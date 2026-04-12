@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>BaaS Lab</title>
+  <title>Самостоятельная работа</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -17,7 +17,7 @@
 
     .container {
       width: 100%;
-      max-width: 500px;
+      max-width: 520px;
       background: white;
       padding: 20px;
       border-radius: 12px;
@@ -35,8 +35,7 @@
     }
 
     button {
-      width: 100%;
-      padding: 10px;
+      padding: 10px 14px;
       background: #007bff;
       color: white;
       border: none;
@@ -49,7 +48,14 @@
       background: #005ecb;
     }
 
+    #submitBtn {
+      width: 100%;
+      margin-top: 8px;
+    }
+
     .post {
+      width: 100%;
+      max-width: 520px;
       background: white;
       border-radius: 12px;
       padding: 14px;
@@ -63,19 +69,33 @@
       float: right;
     }
 
-    .like-btn {
-      margin-top: 8px;
-      background: #f5f5f5;
-      color: black;
-      border: 1px solid #ddd;
-      padding: 8px 12px;
-      border-radius: 6px;
-      cursor: pointer;
-      width: auto;
+    .actions {
+      margin-top: 10px;
+      display: flex;
+      gap: 10px;
     }
 
-    .like-btn:hover {
-      background: #e8e8e8;
+    .like-btn {
+      background: #f2f2f2;
+      color: black;
+      border: 1px solid #ddd;
+    }
+
+    .dislike-btn {
+      background: #ffeaea;
+      color: black;
+      border: 1px solid #f0bcbc;
+    }
+
+    .search-box {
+      width: 100%;
+      max-width: 520px;
+      margin-bottom: 14px;
+    }
+
+    .empty {
+      color: gray;
+      margin-top: 10px;
     }
   </style>
 </head>
@@ -88,7 +108,9 @@
     <button id="submitBtn">Опубликовать в облако</button>
   </div>
 
-  <div id="feed" style="width: 100%; max-width: 500px;"></div>
+  <input class="search-box" type="text" id="searchInput" placeholder="Поиск по имени..." />
+
+  <div id="feed" style="width: 100%; max-width: 520px;"></div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
@@ -117,6 +139,8 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
+    let allPosts = [];
+
     window.processLike = async (id) => {
       const docRef = doc(db, "requests", id);
       try {
@@ -125,6 +149,17 @@
         });
       } catch (e) {
         console.error("Ошибка лайка:", e.message);
+      }
+    };
+
+    window.processDislike = async (id) => {
+      const docRef = doc(db, "requests", id);
+      try {
+        await updateDoc(docRef, {
+          dislikes: increment(1)
+        });
+      } catch (e) {
+        console.error("Ошибка дизлайка:", e.message);
       }
     };
 
@@ -137,6 +172,7 @@
           name: document.getElementById("uName").value,
           email: document.getElementById("uEmail").value,
           likes: 0,
+          dislikes: 0,
           timestamp: serverTimestamp()
         });
 
@@ -150,14 +186,23 @@
       btn.disabled = false;
     };
 
-    const q = query(collection(db, "requests"), orderBy("timestamp", "desc"));
-
-    onSnapshot(q, (snapshot) => {
+    function renderPosts(posts) {
       const feed = document.getElementById("feed");
+      const searchText = document.getElementById("searchInput").value.toLowerCase().trim();
+
+      const filteredPosts = posts.filter((item) =>
+        item.data.name.toLowerCase().includes(searchText)
+      );
+
       feed.innerHTML = "";
 
-      snapshot.forEach((item) => {
-        const data = item.data();
+      if (filteredPosts.length === 0) {
+        feed.innerHTML = '<div class="empty">Ничего не найдено</div>';
+        return;
+      }
+
+      filteredPosts.forEach((item) => {
+        const data = item.data;
         const timeText = data.timestamp?.toDate
           ? data.timestamp.toDate().toLocaleTimeString()
           : "Загрузка...";
@@ -166,11 +211,28 @@
           <div class="post">
             <span class="time">${timeText}</span>
             <b>${data.name}</b><br>
-            <i>${data.email}</i><br>
-            <button class="like-btn" onclick="processLike('${item.id}')">👍 ${data.likes || 0}</button>
+            <i>${data.email}</i>
+            <div class="actions">
+              <button class="like-btn" onclick="processLike('${item.id}')">👍 ${data.likes || 0}</button>
+              <button class="dislike-btn" onclick="processDislike('${item.id}')">👎 ${data.dislikes || 0}</button>
+            </div>
           </div>
         `;
       });
+    }
+
+    const q = query(collection(db, "requests"), orderBy("timestamp", "desc"));
+
+    onSnapshot(q, (snapshot) => {
+      allPosts = snapshot.docs.map((item) => ({
+        id: item.id,
+        data: item.data()
+      }));
+      renderPosts(allPosts);
+    });
+
+    document.getElementById("searchInput").addEventListener("input", () => {
+      renderPosts(allPosts);
     });
   </script>
 
