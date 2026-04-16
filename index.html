@@ -3,187 +3,225 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Самостоятельная работа</title>
+  <title>Личные сообщения (DM)</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #f7f7f9;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 20px;
+      background: #f4f5f7;
       margin: 0;
-    }
-
-    .container {
-      width: 100%;
-      max-width: 520px;
-      background: white;
       padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-      margin-bottom: 20px;
+      display: flex;
+      justify-content: center;
     }
 
-    input {
+    .app {
       width: 100%;
-      padding: 10px;
-      margin: 8px 0;
-      box-sizing: border-box;
-      border: 1px solid #ccc;
-      border-radius: 6px;
+      max-width: 720px;
     }
 
-    button {
-      padding: 10px 14px;
-      background: #007bff;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: bold;
+    .card {
+      background: white;
+      border-radius: 14px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      padding: 16px;
+      margin-bottom: 16px;
     }
 
-    button:hover {
-      background: #005ecb;
+    .top-user {
+      display: flex;
+      align-items: center;
+      gap: 12px;
     }
 
-    button:disabled {
-      background: #8fbdf3;
-      cursor: not-allowed;
-    }
-
-    #submitBtn {
-      width: 100%;
-      margin-top: 8px;
-    }
-
-    .auth-btn {
-      width: 100%;
+    .avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      object-fit: cover;
+      background: #ddd;
     }
 
     .logout-btn {
+      margin-left: auto;
       background: #dc3545;
-      margin-top: 10px;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 12px;
+      cursor: pointer;
     }
 
     .logout-btn:hover {
       background: #b52a37;
     }
 
-    .user-bar {
-      background: #f4f6fb;
-      padding: 12px;
+    .login-btn,
+    .send-btn {
+      background: #007bff;
+      color: white;
+      border: none;
       border-radius: 8px;
-      margin-top: 10px;
+      padding: 10px 14px;
+      cursor: pointer;
+      font-weight: bold;
     }
 
-    .user-bar p {
-      margin: 0;
+    .login-btn:hover,
+    .send-btn:hover {
+      background: #005ecb;
+    }
+
+    .user-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .user-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px;
+      border-radius: 10px;
+      cursor: pointer;
+      border: 1px solid #e6e6e6;
+    }
+
+    .user-item:hover {
+      background: #f7f9fc;
+    }
+
+    .user-item.active {
+      background: #eef5ff;
+      border-color: #bfd8ff;
+    }
+
+    .chat-title {
+      font-weight: bold;
+      margin-bottom: 12px;
+    }
+
+    .messages {
+      height: 320px;
+      overflow-y: auto;
+      border: 1px solid #e6e6e6;
+      border-radius: 12px;
+      padding: 12px;
+      background: #fafafa;
+      margin-bottom: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .message {
+      max-width: 70%;
+      padding: 10px 12px;
+      border-radius: 14px;
+      word-wrap: break-word;
+      font-size: 14px;
+    }
+
+    .my-message {
+      align-self: flex-end;
+      background: #0d6efd;
+      color: white;
+      border-bottom-right-radius: 4px;
+    }
+
+    .other-message {
+      align-self: flex-start;
+      background: #e9ecef;
+      color: black;
+      border-bottom-left-radius: 4px;
+    }
+
+    .message-time {
+      display: block;
+      font-size: 11px;
+      opacity: 0.8;
+      margin-top: 6px;
+    }
+
+    .chat-input-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .chat-input-row input {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      outline: none;
     }
 
     .hint {
       color: #666;
       font-size: 14px;
-      margin-top: 8px;
-    }
-
-    .post {
-      width: 100%;
-      max-width: 520px;
-      background: white;
-      border-radius: 12px;
-      padding: 14px;
-      margin-bottom: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-    }
-
-    .time {
-      font-size: 12px;
-      color: gray;
-      float: right;
-    }
-
-    .actions {
-      margin-top: 10px;
-      display: flex;
-      gap: 10px;
-    }
-
-    .like-btn {
-      background: #f2f2f2;
-      color: black;
-      border: 1px solid #ddd;
-    }
-
-    .like-btn:hover {
-      background: #e6e6e6;
-    }
-
-    .dislike-btn {
-      background: #ffeaea;
-      color: black;
-      border: 1px solid #f0bcbc;
-    }
-
-    .dislike-btn:hover {
-      background: #ffdede;
-    }
-
-    .search-box {
-      width: 100%;
-      max-width: 520px;
-      margin-bottom: 14px;
     }
 
     .empty {
-      color: gray;
-      margin-top: 10px;
+      color: #888;
+      font-size: 14px;
     }
   </style>
 </head>
 <body>
+  <div class="app">
+    <div class="card">
+      <div id="guestBox">
+        <button id="loginBtn" class="login-btn">Войти через Google</button>
+        <p class="hint">Войдите, чтобы пользоваться личными сообщениями.</p>
+      </div>
 
-  <div class="container">
-    <h3>Авторизация</h3>
-
-    <button id="loginBtn" class="auth-btn">Войти через Google</button>
-
-    <div id="userInfo" class="user-bar" style="display:none;">
-      <p><b>Вы вошли как:</b> <span id="userName"></span></p>
-      <p id="userEmailText" class="hint"></p>
-      <button id="logoutBtn" class="logout-btn">Выйти</button>
+      <div id="userBox" style="display:none;">
+        <div class="top-user">
+          <img id="myPhoto" class="avatar" src="" alt="avatar" />
+          <div>
+            <div id="myName"><b>Пользователь</b></div>
+            <div id="myEmail" class="hint"></div>
+          </div>
+          <button id="logoutBtn" class="logout-btn">Выйти</button>
+        </div>
+      </div>
     </div>
 
-    <p id="guestHint" class="hint">
-      Чтобы публиковать записи и ставить лайки/дизлайки, войдите через Google.
-    </p>
+    <div id="mainApp" style="display:none;">
+      <div class="card">
+        <div><b>Выберите собеседника:</b></div>
+        <div id="usersList" class="user-list"></div>
+      </div>
+
+      <div class="card">
+        <div id="chatTitle" class="chat-title">Чат не выбран</div>
+        <div id="messagesBox" class="messages">
+          <div class="empty">Выберите пользователя, чтобы открыть чат.</div>
+        </div>
+
+        <div class="chat-input-row">
+          <input type="text" id="messageInput" placeholder="Ваше сообщение..." />
+          <button id="sendBtn" class="send-btn">➤</button>
+        </div>
+      </div>
+    </div>
   </div>
-
-  <div class="container" id="formBox" style="display:none;">
-    <h3>Панель управления данными</h3>
-    <input type="text" id="uName" placeholder="Имя профиля" />
-    <input type="email" id="uEmail" placeholder="Рабочий Email" />
-    <button id="submitBtn">Опубликовать в облако</button>
-  </div>
-
-  <input class="search-box" type="text" id="searchInput" placeholder="Поиск по имени..." />
-
-  <div id="feed" style="width: 100%; max-width: 520px;"></div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
     import {
       getFirestore,
-      collection,
+      doc,
+      setDoc,
+      getDoc,
+      getDocs,
       addDoc,
+      collection,
       query,
       orderBy,
       onSnapshot,
-      serverTimestamp,
-      updateDoc,
-      doc,
-      increment
+      serverTimestamp
     } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
     import {
@@ -208,20 +246,26 @@
     const auth = getAuth(app);
     const provider = new GoogleAuthProvider();
 
-    let allPosts = [];
-
     const loginBtn = document.getElementById("loginBtn");
     const logoutBtn = document.getElementById("logoutBtn");
-    const userInfo = document.getElementById("userInfo");
-    const userName = document.getElementById("userName");
-    const userEmailText = document.getElementById("userEmailText");
-    const guestHint = document.getElementById("guestHint");
-    const formBox = document.getElementById("formBox");
-    const uName = document.getElementById("uName");
-    const uEmail = document.getElementById("uEmail");
-    const submitBtn = document.getElementById("submitBtn");
-    const searchInput = document.getElementById("searchInput");
-    const feed = document.getElementById("feed");
+
+    const guestBox = document.getElementById("guestBox");
+    const userBox = document.getElementById("userBox");
+    const mainApp = document.getElementById("mainApp");
+
+    const myPhoto = document.getElementById("myPhoto");
+    const myName = document.getElementById("myName");
+    const myEmail = document.getElementById("myEmail");
+
+    const usersList = document.getElementById("usersList");
+    const chatTitle = document.getElementById("chatTitle");
+    const messagesBox = document.getElementById("messagesBox");
+    const messageInput = document.getElementById("messageInput");
+    const sendBtn = document.getElementById("sendBtn");
+
+    let currentUser = null;
+    let selectedUser = null;
+    let unsubscribeMessages = null;
 
     loginBtn.onclick = async () => {
       try {
@@ -237,162 +281,194 @@
         await signOut(auth);
       } catch (e) {
         console.error("Ошибка выхода:", e);
-        alert("Ошибка при выходе");
       }
     };
 
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        loginBtn.style.display = "none";
-        userInfo.style.display = "block";
-        formBox.style.display = "block";
-        guestHint.style.display = "none";
+    function getChatId(uid1, uid2) {
+      return [uid1, uid2].sort().join("_");
+    }
 
-        userName.textContent = user.displayName || "Пользователь";
-        userEmailText.textContent = user.email || "";
+    async function saveUserToFirestore(user) {
+      const userRef = doc(db, "users", user.uid);
 
-        uName.value = user.displayName || "";
-        uEmail.value = user.email || "";
+      await setDoc(userRef, {
+        uid: user.uid,
+        name: user.displayName || "Без имени",
+        email: user.email || "",
+        photo: user.photoURL || ""
+      }, { merge: true });
+    }
 
-        uName.readOnly = true;
-        uEmail.readOnly = true;
-      } else {
-        loginBtn.style.display = "block";
-        userInfo.style.display = "none";
-        formBox.style.display = "none";
-        guestHint.style.display = "block";
+    async function loadUsers() {
+      usersList.innerHTML = "";
+      const snapshot = await getDocs(collection(db, "users"));
 
-        userName.textContent = "";
-        userEmailText.textContent = "";
-
-        uName.value = "";
-        uEmail.value = "";
-      }
-    });
-
-    window.processLike = async (id) => {
-      if (!auth.currentUser) {
-        alert("Лайки доступны только после входа через Google");
-        return;
-      }
-
-      const docRef = doc(db, "requests", id);
-
-      try {
-        await updateDoc(docRef, {
-          likes: increment(1)
-        });
-      } catch (e) {
-        console.error("Ошибка лайка:", e.message);
-        alert("Не удалось поставить лайк");
-      }
-    };
-
-    window.processDislike = async (id) => {
-      if (!auth.currentUser) {
-        alert("Дизлайки доступны только после входа через Google");
-        return;
-      }
-
-      const docRef = doc(db, "requests", id);
-
-      try {
-        await updateDoc(docRef, {
-          dislikes: increment(1)
-        });
-      } catch (e) {
-        console.error("Ошибка дизлайка:", e.message);
-        alert("Не удалось поставить дизлайк");
-      }
-    };
-
-    submitBtn.onclick = async () => {
-      if (!auth.currentUser) {
-        alert("Сначала войдите через Google");
-        return;
-      }
-
-      const nameValue = uName.value.trim();
-      const emailValue = uEmail.value.trim();
-
-      if (nameValue.length < 2) {
-        alert("Имя должно содержать минимум 2 символа");
-        return;
-      }
-
-      if (!emailValue.includes("@")) {
-        alert("Введите корректный email");
-        return;
-      }
-
-      submitBtn.disabled = true;
-
-      try {
-        await addDoc(collection(db, "requests"), {
-          name: nameValue,
-          email: emailValue,
-          likes: 0,
-          dislikes: 0,
-          timestamp: serverTimestamp()
-        });
-      } catch (e) {
-        console.error("Ошибка добавления:", e);
-        alert("Ошибка безопасности. Проверь вход через Google и Firestore Rules.");
-      }
-
-      submitBtn.disabled = false;
-    };
-
-    function renderPosts(posts) {
-      const searchText = searchInput.value.toLowerCase().trim();
-
-      const filteredPosts = posts.filter((item) => {
-        const postName = (item.data.name || "").toLowerCase();
-        return postName.includes(searchText);
+      const users = [];
+      snapshot.forEach((docItem) => {
+        const data = docItem.data();
+        if (data.uid !== currentUser.uid) {
+          users.push(data);
+        }
       });
 
-      feed.innerHTML = "";
-
-      if (filteredPosts.length === 0) {
-        feed.innerHTML = '<div class="empty">Ничего не найдено</div>';
+      if (users.length === 0) {
+        usersList.innerHTML = '<div class="empty">Других пользователей пока нет.</div>';
         return;
       }
 
-      filteredPosts.forEach((item) => {
-        const data = item.data;
+      users.forEach((user) => {
+        const div = document.createElement("div");
+        div.className = "user-item";
+        if (selectedUser && selectedUser.uid === user.uid) {
+          div.classList.add("active");
+        }
 
-        const timeText = data.timestamp?.toDate
-          ? data.timestamp.toDate().toLocaleTimeString()
-          : "Загрузка...";
-
-        feed.innerHTML += `
-          <div class="post">
-            <span class="time">${timeText}</span>
-            <b>${data.name || "Без имени"}</b><br>
-            <i>${data.email || "Без email"}</i>
-            <div class="actions">
-              <button class="like-btn" onclick="processLike('${item.id}')">👍 ${data.likes || 0}</button>
-              <button class="dislike-btn" onclick="processDislike('${item.id}')">👎 ${data.dislikes || 0}</button>
-            </div>
+        div.innerHTML = `
+          <img class="avatar" src="${user.photo || ""}" alt="avatar" />
+          <div>
+            <div><b>${user.name || "Без имени"}</b></div>
+            <div class="hint">${user.email || ""}</div>
           </div>
         `;
+
+        div.onclick = async () => {
+          selectedUser = user;
+          await openChatWithUser(user);
+          loadUsers();
+        };
+
+        usersList.appendChild(div);
       });
     }
 
-    const q = query(collection(db, "requests"), orderBy("timestamp", "desc"));
+    async function openChatWithUser(user) {
+      const chatId = getChatId(currentUser.uid, user.uid);
+      const chatRef = doc(db, "chats", chatId);
 
-    onSnapshot(q, (snapshot) => {
-      allPosts = snapshot.docs.map((item) => ({
-        id: item.id,
-        data: item.data()
-      }));
-      renderPosts(allPosts);
+      const chatSnap = await getDoc(chatRef);
+
+      if (!chatSnap.exists()) {
+        await setDoc(chatRef, {
+          participants: [currentUser.uid, user.uid]
+        });
+      }
+
+      chatTitle.textContent = `Чат с: ${user.name}`;
+      loadMessages(chatId);
+    }
+
+    function loadMessages(chatId) {
+      if (unsubscribeMessages) {
+        unsubscribeMessages();
+      }
+
+      const messagesRef = collection(db, "chats", chatId, "messages");
+      const q = query(messagesRef, orderBy("timestamp", "asc"));
+
+      unsubscribeMessages = onSnapshot(q, (snapshot) => {
+        messagesBox.innerHTML = "";
+
+        if (snapshot.empty) {
+          messagesBox.innerHTML = '<div class="empty">Сообщений пока нет.</div>';
+          return;
+        }
+
+        snapshot.forEach((docItem) => {
+          const msg = docItem.data();
+          const div = document.createElement("div");
+
+          const isMine = msg.senderId === currentUser.uid;
+          div.className = `message ${isMine ? "my-message" : "other-message"}`;
+
+          const timeText = msg.timestamp?.toDate
+            ? msg.timestamp.toDate().toLocaleTimeString()
+            : "";
+
+          div.innerHTML = `
+            ${msg.text || ""}
+            <span class="message-time">${timeText}</span>
+          `;
+
+          messagesBox.appendChild(div);
+        });
+
+        messagesBox.scrollTop = messagesBox.scrollHeight;
+      });
+    }
+
+    async function sendMessage() {
+      if (!currentUser) {
+        alert("Сначала войдите");
+        return;
+      }
+
+      if (!selectedUser) {
+        alert("Сначала выберите собеседника");
+        return;
+      }
+
+      const text = messageInput.value.trim();
+      if (!text) {
+        return;
+      }
+
+      const chatId = getChatId(currentUser.uid, selectedUser.uid);
+
+      try {
+        await addDoc(collection(db, "chats", chatId, "messages"), {
+          text: text,
+          senderId: currentUser.uid,
+          receiverId: selectedUser.uid,
+          timestamp: serverTimestamp()
+        });
+
+        messageInput.value = "";
+      } catch (e) {
+        console.error("Ошибка отправки:", e);
+        alert("Не удалось отправить сообщение");
+      }
+    }
+
+    sendBtn.onclick = sendMessage;
+
+    messageInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        sendMessage();
+      }
     });
 
-    searchInput.addEventListener("input", () => {
-      renderPosts(allPosts);
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        currentUser = user;
+
+        guestBox.style.display = "none";
+        userBox.style.display = "block";
+        mainApp.style.display = "block";
+
+        myPhoto.src = user.photoURL || "";
+        myName.innerHTML = `<b>${user.displayName || "Пользователь"}</b>`;
+        myEmail.textContent = user.email || "";
+
+        await saveUserToFirestore(user);
+        await loadUsers();
+      } else {
+        currentUser = null;
+        selectedUser = null;
+
+        guestBox.style.display = "block";
+        userBox.style.display = "none";
+        mainApp.style.display = "none";
+
+        usersList.innerHTML = "";
+        chatTitle.textContent = "Чат не выбран";
+        messagesBox.innerHTML = '<div class="empty">Выберите пользователя, чтобы открыть чат.</div>';
+
+        if (unsubscribeMessages) {
+          unsubscribeMessages();
+          unsubscribeMessages = null;
+        }
+      }
     });
   </script>
-
 </body>
 </html>
