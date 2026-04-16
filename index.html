@@ -48,8 +48,43 @@
       background: #005ecb;
     }
 
+    button:disabled {
+      background: #8fbdf3;
+      cursor: not-allowed;
+    }
+
     #submitBtn {
       width: 100%;
+      margin-top: 8px;
+    }
+
+    .auth-btn {
+      width: 100%;
+    }
+
+    .logout-btn {
+      background: #dc3545;
+      margin-top: 10px;
+    }
+
+    .logout-btn:hover {
+      background: #b52a37;
+    }
+
+    .user-bar {
+      background: #f4f6fb;
+      padding: 12px;
+      border-radius: 8px;
+      margin-top: 10px;
+    }
+
+    .user-bar p {
+      margin: 0;
+    }
+
+    .hint {
+      color: #666;
+      font-size: 14px;
       margin-top: 8px;
     }
 
@@ -81,10 +116,18 @@
       border: 1px solid #ddd;
     }
 
+    .like-btn:hover {
+      background: #e6e6e6;
+    }
+
     .dislike-btn {
       background: #ffeaea;
       color: black;
       border: 1px solid #f0bcbc;
+    }
+
+    .dislike-btn:hover {
+      background: #ffdede;
     }
 
     .search-box {
@@ -102,6 +145,22 @@
 <body>
 
   <div class="container">
+    <h3>Авторизация</h3>
+
+    <button id="loginBtn" class="auth-btn">Войти через Google</button>
+
+    <div id="userInfo" class="user-bar" style="display:none;">
+      <p><b>Вы вошли как:</b> <span id="userName"></span></p>
+      <p id="userEmailText" class="hint"></p>
+      <button id="logoutBtn" class="logout-btn">Выйти</button>
+    </div>
+
+    <p id="guestHint" class="hint">
+      Чтобы публиковать записи и ставить лайки/дизлайки, войдите через Google.
+    </p>
+  </div>
+
+  <div class="container" id="formBox" style="display:none;">
     <h3>Панель управления данными</h3>
     <input type="text" id="uName" placeholder="Имя профиля" />
     <input type="email" id="uEmail" placeholder="Рабочий Email" />
@@ -127,6 +186,14 @@
       increment
     } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
+    import {
+      getAuth,
+      GoogleAuthProvider,
+      signInWithPopup,
+      signOut,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+
     const firebaseConfig = {
       apiKey: "AIzaSyCDJTrafhcsfW7KrODLeoTBerMWIiDpB1Y",
       authDomain: "my-firebase-site-23fcb.firebaseapp.com",
@@ -138,61 +205,151 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
 
     let allPosts = [];
 
+    const loginBtn = document.getElementById("loginBtn");
+    const logoutBtn = document.getElementById("logoutBtn");
+    const userInfo = document.getElementById("userInfo");
+    const userName = document.getElementById("userName");
+    const userEmailText = document.getElementById("userEmailText");
+    const guestHint = document.getElementById("guestHint");
+    const formBox = document.getElementById("formBox");
+    const uName = document.getElementById("uName");
+    const uEmail = document.getElementById("uEmail");
+    const submitBtn = document.getElementById("submitBtn");
+    const searchInput = document.getElementById("searchInput");
+    const feed = document.getElementById("feed");
+
+    loginBtn.onclick = async () => {
+      try {
+        await signInWithPopup(auth, provider);
+      } catch (e) {
+        console.error("Ошибка входа:", e);
+        alert("Не удалось войти через Google");
+      }
+    };
+
+    logoutBtn.onclick = async () => {
+      try {
+        await signOut(auth);
+      } catch (e) {
+        console.error("Ошибка выхода:", e);
+        alert("Ошибка при выходе");
+      }
+    };
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        loginBtn.style.display = "none";
+        userInfo.style.display = "block";
+        formBox.style.display = "block";
+        guestHint.style.display = "none";
+
+        userName.textContent = user.displayName || "Пользователь";
+        userEmailText.textContent = user.email || "";
+
+        uName.value = user.displayName || "";
+        uEmail.value = user.email || "";
+
+        uName.readOnly = true;
+        uEmail.readOnly = true;
+      } else {
+        loginBtn.style.display = "block";
+        userInfo.style.display = "none";
+        formBox.style.display = "none";
+        guestHint.style.display = "block";
+
+        userName.textContent = "";
+        userEmailText.textContent = "";
+
+        uName.value = "";
+        uEmail.value = "";
+      }
+    });
+
     window.processLike = async (id) => {
+      if (!auth.currentUser) {
+        alert("Лайки доступны только после входа через Google");
+        return;
+      }
+
       const docRef = doc(db, "requests", id);
+
       try {
         await updateDoc(docRef, {
           likes: increment(1)
         });
       } catch (e) {
         console.error("Ошибка лайка:", e.message);
+        alert("Не удалось поставить лайк");
       }
     };
 
     window.processDislike = async (id) => {
+      if (!auth.currentUser) {
+        alert("Дизлайки доступны только после входа через Google");
+        return;
+      }
+
       const docRef = doc(db, "requests", id);
+
       try {
         await updateDoc(docRef, {
           dislikes: increment(1)
         });
       } catch (e) {
         console.error("Ошибка дизлайка:", e.message);
+        alert("Не удалось поставить дизлайк");
       }
     };
 
-    document.getElementById("submitBtn").onclick = async () => {
-      const btn = document.getElementById("submitBtn");
-      btn.disabled = true;
+    submitBtn.onclick = async () => {
+      if (!auth.currentUser) {
+        alert("Сначала войдите через Google");
+        return;
+      }
+
+      const nameValue = uName.value.trim();
+      const emailValue = uEmail.value.trim();
+
+      if (nameValue.length < 2) {
+        alert("Имя должно содержать минимум 2 символа");
+        return;
+      }
+
+      if (!emailValue.includes("@")) {
+        alert("Введите корректный email");
+        return;
+      }
+
+      submitBtn.disabled = true;
 
       try {
         await addDoc(collection(db, "requests"), {
-          name: document.getElementById("uName").value,
-          email: document.getElementById("uEmail").value,
+          name: nameValue,
+          email: emailValue,
           likes: 0,
           dislikes: 0,
           timestamp: serverTimestamp()
         });
-
-        document.getElementById("uName").value = "";
-        document.getElementById("uEmail").value = "";
       } catch (e) {
-        alert("Ошибка безопасности. Данные отклонены сервером.");
-        console.error(e);
+        console.error("Ошибка добавления:", e);
+        alert("Ошибка безопасности. Проверь вход через Google и Firestore Rules.");
       }
 
-      btn.disabled = false;
+      submitBtn.disabled = false;
     };
 
     function renderPosts(posts) {
-      const feed = document.getElementById("feed");
-      const searchText = document.getElementById("searchInput").value.toLowerCase().trim();
+      const searchText = searchInput.value.toLowerCase().trim();
 
-      const filteredPosts = posts.filter((item) =>
-        item.data.name.toLowerCase().includes(searchText)
-      );
+      const filteredPosts = posts.filter((item) => {
+        const postName = (item.data.name || "").toLowerCase();
+        return postName.includes(searchText);
+      });
 
       feed.innerHTML = "";
 
@@ -203,6 +360,7 @@
 
       filteredPosts.forEach((item) => {
         const data = item.data;
+
         const timeText = data.timestamp?.toDate
           ? data.timestamp.toDate().toLocaleTimeString()
           : "Загрузка...";
@@ -210,8 +368,8 @@
         feed.innerHTML += `
           <div class="post">
             <span class="time">${timeText}</span>
-            <b>${data.name}</b><br>
-            <i>${data.email}</i>
+            <b>${data.name || "Без имени"}</b><br>
+            <i>${data.email || "Без email"}</i>
             <div class="actions">
               <button class="like-btn" onclick="processLike('${item.id}')">👍 ${data.likes || 0}</button>
               <button class="dislike-btn" onclick="processDislike('${item.id}')">👎 ${data.dislikes || 0}</button>
@@ -231,7 +389,7 @@
       renderPosts(allPosts);
     });
 
-    document.getElementById("searchInput").addEventListener("input", () => {
+    searchInput.addEventListener("input", () => {
       renderPosts(allPosts);
     });
   </script>
