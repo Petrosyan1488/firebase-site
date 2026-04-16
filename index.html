@@ -341,21 +341,22 @@
       });
     }
 
-    async function openChatWithUser(user) {
-      const chatId = getChatId(currentUser.uid, user.uid);
-      const chatRef = doc(db, "chats", chatId);
+async function openChatWithUser(user) {
+  const chatId = getChatId(currentUser.uid, user.uid);
+  const chatRef = doc(db, "chats", chatId);
 
-      const chatSnap = await getDoc(chatRef);
+  try {
+    await setDoc(chatRef, {
+      participants: [currentUser.uid, user.uid]
+    }, { merge: true });
 
-      if (!chatSnap.exists()) {
-        await setDoc(chatRef, {
-          participants: [currentUser.uid, user.uid]
-        });
-      }
-
-      chatTitle.textContent = `Чат с: ${user.name}`;
-      loadMessages(chatId);
-    }
+    chatTitle.textContent = `Чат с: ${user.name}`;
+    loadMessages(chatId);
+  } catch (e) {
+    console.error("Ошибка открытия чата:", e);
+    alert("Не удалось открыть чат");
+  }
+}
 
     function loadMessages(chatId) {
       if (unsubscribeMessages) {
